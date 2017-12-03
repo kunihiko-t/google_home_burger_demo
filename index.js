@@ -11,7 +11,7 @@
  const SAY_THAT_AGAIN_ACTION = "say_that_again"
  const DECIDE_WHICH_BURGER_ACTION = "decide_which_burger"
  const CONFIRM_ACTION = "confirm"
- 
+
  const SAY_THAT_AGAIN_PREFIX = "さっきは"
  const SAY_THAT_AGAIN_SUFFIX = "と言いました。"
  let buildLastPrompt = (text)=>{
@@ -54,10 +54,7 @@
     if (app.isPermissionGranted()) {
       let displayName = app.getUserName().displayName;
       app.userStorage.displayName = displayName
-      let textToSpeech = '<speak>'
-      + 'ありがとうございます。'+displayName+"さん。では３０分後に"+app.userStorage.burger+"をお届けしますね。"
-      + '<audio src="https://firebasestorage.googleapis.com/v0/b/burger-80424.appspot.com/o/decision4.mp3?alt=media&token=d58e8b02-5699-403c-9a13-9240cb400517" />. '
-      + '</speak>'
+      let textToSpeech = `ありがとうございます。${displayName}さん。では３０分後に${app.userStorage.burger}をお届けしますね。`
       app.tell(textToSpeech);
     }else{
       app.tell("配達には名前と住所が必要です。残念ですが注文を完了できませんでした。アプリを終了します。");      
