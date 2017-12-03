@@ -5,12 +5,13 @@
  const functions = require('firebase-functions');
  
 
- // Action names from Dialogflow intents
+ // DialogflowのIntentで指定したAction名
  const WELCOME_ACTION = 'input.welcome';
  const ANSWER_PERMISSION_ACTION = "answer_permission"
  const SAY_THAT_AGAIN_ACTION = "say_that_again"
  const DECIDE_WHICH_BURGER_ACTION = "decide_which_burger"
  const CONFIRM_ACTION = "confirm"
+ 
  const SAY_THAT_AGAIN_PREFIX = "さっきは"
  const SAY_THAT_AGAIN_SUFFIX = "と言いました。"
  let buildLastPrompt = (text)=>{
@@ -24,7 +25,7 @@
 
 
    let welcome = (app)=>{
-    //ユーザがアプリを使ったことがある場合は話す内容を帰る。
+    //ユーザがアプリを使ったことがある場合は話す内容を変える。
     if (app.userStorage.displayName && app.userStorage.burger) {
       let text = `こんにちは。${app.userStorage.displayName}さん。前回は${app.userStorage.burger}を注文しましたが。今回も同じものを注文しますか？`
       app.data.lastPrompt = buildLastPrompt(text)
@@ -42,11 +43,13 @@
     app.userStorage.burger = burger
     let namePermission = app.SupportedPermissions.NAME;
     let preciseLocationPermission = app.SupportedPermissions.DEVICE_PRECISE_LOCATION
+    //askForPermissionsでユーザの名前とデバイスのロケーションを取得を要求する
     app.askForPermissions(burger+'ですね。ご注文には',
     [namePermission, preciseLocationPermission]);
   }
 
- 
+  //ユーザがアプリにパーミッションを与えたら正常に注文完了
+  //Event: actions_intent_PERMISSION が設定されているIntentがから呼び出される
   let answerPermission = (app)=>{
     if (app.isPermissionGranted()) {
       let displayName = app.getUserName().displayName;
@@ -61,13 +64,14 @@
     }
   }
 
-
+  //直前の内容をもう一度話す
   let sayThatAgain = (app)=>{
     app.ask({
         speech: app.data.lastPrompt
     });
   }
 
+  //Event: action_intent_CONFIRMATIONが設定されているIntentから呼び出される
   let confirmHandler = (app)=>{
     if (app.getUserConfirmation()) {
       app.tell(`では30分後に${app.userStorage.burger}をお届けしますね。いましばらくお待ち下さい。`);
@@ -81,14 +85,11 @@
   }
 
 
-   // d. build an action map, which maps intent names to functions
    let actionMap = new Map();
    actionMap.set(WELCOME_ACTION, welcome);
    actionMap.set(DECIDE_WHICH_BURGER_ACTION, decideWhichBurger);
    actionMap.set(ANSWER_PERMISSION_ACTION, answerPermission);
    actionMap.set(SAY_THAT_AGAIN_ACTION, sayThatAgain);
    actionMap.set(CONFIRM_ACTION, confirmHandler);
-   
-
- app.handleRequest(actionMap);
+   app.handleRequest(actionMap);
  });
